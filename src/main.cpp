@@ -3,6 +3,7 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
+#include <MQ135.h>
 
 #define DHTPIN 2     // Digital pin connected to the DHT sensor 
 // Feather HUZZAH ESP8266 note: use pins 3, 4, 5, 12, 13 or 14 --
@@ -12,11 +13,17 @@
 #define DHTTYPE    DHT11     // DHT 11
 //#define DHTTYPE    DHT22     // DHT 22 (AM2302)
 //#define DHTTYPE    DHT21     // DHT 21 (AM2301)
+#define PIN_MQ135  A2
 #define LED_Yellow 21
 #define Key_1      48
+
+MQ135 mq135_sensor(PIN_MQ135);
 DHT_Unified dht(DHTPIN, DHTTYPE);
+float temperature = 21.0; // Assume current temperature. Recommended to measure with DHT22
+float humidity = 25.0; // Assume current humidity. Recommended to measure with DHT22
 uint32_t delayMS;
 uint8_t LED_state = 0;
+
 //  按键中断服务函数
 void Key_state_Service(void) {
   LED_state = digitalRead(Key_1);
@@ -42,7 +49,7 @@ void setup() {
   dht.temperature().getSensor(&sensor);
   dht.humidity().getSensor(&sensor);
   // Set delay between sensor readings based on sensor details.
-  delayMS = sensor.min_delay / 3000;  //延迟1s
+  delayMS = sensor.min_delay / 1000;  //延迟1s
 }
 
 void loop() {
@@ -50,7 +57,7 @@ void loop() {
   // 获取温湿度并打印值
   sensors_event_t event;
   dht.temperature().getEvent(&event);   // 获取DHT11传感器标志位
-  if (isnan(event.temperature)) {
+  /*if (isnan(event.temperature)) {
     Serial.println(F("Error reading temperature!"));
   }
   else {
@@ -66,7 +73,25 @@ void loop() {
     Serial.print(F("Humidity: "));
     Serial.print(event.relative_humidity);
     Serial.println(F("%"));
-  }
+  }*/
+
+  float rzero = mq135_sensor.getRZero();
+  float correctedRZero = mq135_sensor.getCorrectedRZero(temperature, humidity);
+  float resistance = mq135_sensor.getResistance();
+  float ppm = mq135_sensor.getPPM();
+  float correctedPPM = mq135_sensor.getCorrectedPPM(temperature, humidity);
+
+  Serial.print("MQ135 RZero: ");
+  Serial.print(rzero);
+  Serial.print("\t Corrected RZero: ");
+  Serial.print(correctedRZero);
+  Serial.print("\t Resistance: ");
+  Serial.print(resistance);
+  Serial.print("\t PPM: ");
+  Serial.print(ppm);
+  Serial.print("\t Corrected PPM: ");
+  Serial.print(correctedPPM);
+  Serial.println("ppm");
 }
 
 // put function definitions here:
