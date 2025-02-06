@@ -4,6 +4,7 @@
 #include <DHT.h>
 #include <DHT_U.h>
 #include <MQ135.h>
+#include <MQUnifiedsensor.h>
 
 #define DHTPIN 2     // Digital pin connected to the DHT sensor 
 // Feather HUZZAH ESP8266 note: use pins 3, 4, 5, 12, 13 or 14 --
@@ -44,6 +45,10 @@ void setup() {
   attachInterrupt(Key_1, Key_state_Service, CHANGE);    // 为按键引脚设置中断服务函数，在setup函数中调用  dht.begin();       // DHT11初始化 
   dht.begin();       // DHT11初始化 
   Serial.println(F("DHT11 Initialized Completed"));
+
+  // 设置ADC分辨率位12位
+  analogReadResolution(12);
+
   // Print temperature sensor details.
   sensor_t sensor;
   dht.temperature().getSensor(&sensor);
