@@ -17,6 +17,7 @@
 #define PIN_MQ135  A2
 #define LED_Yellow 21
 #define Key_1      48
+#define Soil_val   A0
 
 MQ135 mq135_sensor(PIN_MQ135);
 DHT_Unified dht(DHTPIN, DHTTYPE);
@@ -24,6 +25,7 @@ float temperature = 21.0; // Assume current temperature. Recommended to measure 
 float humidity = 25.0; // Assume current humidity. Recommended to measure with DHT22
 uint32_t delayMS;
 uint8_t LED_state = 0;
+float Soil_wet = 0;
 
 //  按键中断服务函数
 void Key_state_Service(void) {
@@ -79,21 +81,14 @@ void loop() {
     Serial.print(event.relative_humidity);
     Serial.println(F("%"));
   }*/
-
+  Soil_wet = analogRead(Soil_val);
+  Serial.print("Soil_wet: ");
+  Serial.println(Soil_wet);
   float rzero = mq135_sensor.getRZero();
   float correctedRZero = mq135_sensor.getCorrectedRZero(temperature, humidity);
   float resistance = mq135_sensor.getResistance();
   float ppm = mq135_sensor.getPPM();
   float correctedPPM = mq135_sensor.getCorrectedPPM(temperature, humidity);
-
-  Serial.print("MQ135 RZero: ");
-  Serial.print(rzero);
-  Serial.print("\t Corrected RZero: ");
-  Serial.print(correctedRZero);
-  Serial.print("\t Resistance: ");
-  Serial.print(resistance);
-  Serial.print("\t PPM: ");
-  Serial.print(ppm);
   Serial.print("\t Corrected PPM: ");
   Serial.print(correctedPPM);
   Serial.println("ppm");
